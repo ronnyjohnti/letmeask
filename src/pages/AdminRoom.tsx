@@ -9,6 +9,8 @@ import { Question } from "../components/Question";
 
 import logoImg from "../assets/images/logo.svg";
 import deleteImg from "../assets/images/delete.svg";
+import checkImg from "../assets/images/check.svg";
+import answerImg from "../assets/images/answer.svg";
 
 import "../styles/room.scss";
 
@@ -17,32 +19,47 @@ type RoomParams = {
 };
 
 export function AdminRoom() {
-	const history = useHistory();
+  const history = useHistory();
   const { id: roomId } = useParams<RoomParams>();
   const { questions, title } = useRoom(roomId);
 
-	async function handleEndRoom() {
-		await database.ref(`rooms/${roomId}`).update({
-			endedAt: new Date()
-		})
+  async function handleEndRoom() {
+    await database.ref(`rooms/${roomId}`).update({
+      endedAt: new Date(),
+    });
 
-		history.push('/');
-	}
-	async function handleDeleteQuestion(questionId: string) {
-		if(window.confirm("Tem certeza que você deseja excluir esta pergunta?")) {
-			await database.ref(`rooms/${roomId}/questions/${questionId}`).remove();
-		}
-	}
+    history.push("/");
+  }
+
+  async function handleCheckQuestionAsAnswered(questionId: string) {
+    await database.ref(`rooms/${roomId}/questions/${questionId}`).update({
+      isAnswered: true,
+    });
+  }
+
+  async function handleHighlightQuestion(questionId: string) {
+    await database.ref(`rooms/${roomId}/questions/${questionId}`).update({
+      isHighlighted: true,
+    });
+  }
+
+  async function handleDeleteQuestion(questionId: string) {
+    if (window.confirm("Tem certeza que você deseja excluir esta pergunta?")) {
+      await database.ref(`rooms/${roomId}/questions/${questionId}`).remove();
+    }
+  }
 
   return (
     <div id="page-room">
       <header>
         <div className="content">
           <img src={logoImg} alt="Letmeask" />
-					<div>
-          	<RoomCode code={roomId} />
-						<Button isOutlined onClick={handleEndRoom}>Encerrar Sala</Button>
-					</div>
+          <div>
+            <RoomCode code={roomId} />
+            <Button isOutlined onClick={handleEndRoom}>
+              Encerrar Sala
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -58,18 +75,47 @@ export function AdminRoom() {
           </div>
 
           <div className="questions-list">
-            {questions.map(({ id, content, author }) => {
-              return (
-								<Question key={id} author={author} content={content}>
-									<button
-										type='button'
-										onClick={() => handleDeleteQuestion(id)}
-									>
-										<img src={deleteImg} alt="Remover pergunta" />
-									</button>
-								</Question>
-							)
-            })}
+            {questions.map(
+              ({ id, content, author, isAnswered, isHighlighted }) => {
+                return (
+                  <Question
+                    key={id}
+                    author={author}
+                    content={content}
+                    isAnswered={isAnswered}
+                    isHighlighted={isHighlighted}
+                  >
+                    {!isAnswered && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleCheckQuestionAsAnswered(id)}
+                        >
+                          <img
+                            src={checkImg}
+                            alt="marcar pergunta como respondida"
+                          />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleHighlightQuestion(id)}
+                        >
+                          <img src={answerImg} alt="Dar destaque à pergunta" />
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteQuestion(id)}
+                    >
+                      <img src={deleteImg} alt="Remover pergunta" />
+                    </button>
+                  </Question>
+                );
+              }
+            )}
           </div>
         </div>
       </main>
