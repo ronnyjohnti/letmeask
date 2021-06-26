@@ -13,6 +13,13 @@
 			> img {
 				max-height: 45px;
 			}
+
+			> div { 
+				display: flex;
+					gap: 16px;
+
+				button {height: 40px}
+			}
 		}
 	}
 
@@ -76,6 +83,10 @@
 					}
 				}
 			}
+		}
+
+		.questions-list {
+			margin-top: 32px;
 		}
 	}
 }

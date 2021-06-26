@@ -3,13 +3,13 @@ import { useHistory } from 'react-router-dom';
 
 import { Button } from '../components/Button';
 import { useAuth } from '../hooks/useAuth';
+import { database } from '../services/firebase';
 
 import illustrationImg from '../assets/images/illustration.svg';
 import logoImg from '../assets/images/logo.svg';
 import googleIconImg from '../assets/images/google-icon.svg';
 
 import '../styles/auth.scss';
-import { database } from '../services/firebase';
 
 export function Home() {
 	const history = useHistory();
@@ -34,6 +34,11 @@ export function Home() {
 		const roomRef = await database.ref(`rooms/${roomCode}`).get();
 		if(!roomRef.exists()) {
 			alert('Room does not exists.');
+			return;
+		}
+
+		if(!roomRef.val().endedAt) {
+			alert('Room already closed.');
 			return;
 		}
 
